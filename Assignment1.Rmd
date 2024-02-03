@@ -1,0 +1,39 @@
+---
+title: "Assignment1-FML"
+output:
+  pdf_document: default
+  html_document: default
+  word_document: default
+date: '2024-02-03'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+## Descriptive statistics
+```{r stats, echo=FALSE}
+Cars93 <- read.csv("/Users/kevincakanac/Kevin_R/Cars93.csv")
+summary(Cars93)
+```
+## Showing Cars with Horsepower > 150 only
+```{r transformation, echo=FALSE}
+Cars93 <- data.frame(Cars93)
+Horsepower150 <- Cars93[Cars93$Horsepower >= 150, ]
+print(Horsepower150)
+```
+## Histogram of the Horsepower
+```{r Histogram}
+hist(Cars93$Horsepower, main = "Horsepower of Cars histogram")
+```
+
+```{r Scatterplot}
+plot(Cars93$Price, Cars93$Horsepower, main = "Horsepower and Price scatterplot")
+```
