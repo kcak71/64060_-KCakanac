@@ -1,0 +1,94 @@
+---
+title: "Assignment3"
+output:
+  pdf_document: default
+  html_document: default
+date: '2024-03-06'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+library(readr)
+library(class)
+library(caret)
+library(ISLR)
+library(reshape2)
+library(e1071)
+library(pROC)
+library(gmodels)
+```
+
+
+```{r}
+UniversalBank <- read_csv("UniversalBank.csv")
+```
+
+```{r}
+Training_Index <- createDataPartition(UniversalBank$Experience, p = .5996, list = FALSE)
+Training_data <- UniversalBank[Training_Index,]
+Validation_data <- UniversalBank[-Training_Index,]
+```
+```{r}
+pivot_UB<- table(Training_data$CreditCard, Training_data$Online, Training_data$`Personal Loan`)
+rownames(pivot_UB) <- c("No CC", "Yes CC")
+colnames(pivot_UB) <- c("No Online", "Yes Online")
+pivot_UB
+```
+```{r}
+CC_Online_1 <- Training_data$`Personal Loan`[Training_data$CreditCard == "1" & Training_data$Online == "1"]
+mean(CC_Online_1)
+```
+```{r}
+pivot_table_online <- table(Training_data$`Personal Loan`, Training_data$Online)
+rownames(pivot_table_online) <- c("No Loan", "Loan")
+colnames(pivot_table_online) <- c("Offline", "Online")
+pivot_table_online
+```
+
+```{r}
+pivot_table_cc <- table(Training_data$`Personal Loan`, Training_data$CreditCard)
+rownames(pivot_table_cc) <- c("No Loan", "Loan")
+colnames(pivot_table_cc) <- c("No Credit Card", "Has Credit Card")
+pivot_table_cc
+```
+```{r}
+cc_loan_acceptors <- sum(Training_data$CreditCard[Training_data$`Personal Loan` == 1])
+loan_acceptors <- sum(Training_data$`Personal Loan` == 1)
+prop_cc_loan_acceptors <- cc_loan_acceptors / loan_acceptors
+prop_cc_loan_acceptors
+```
+```{r}
+online_loan_acceptors <- sum(Training_data$Online[Training_data$`Personal Loan` == 1])
+prop_online_loan_acceptors <- online_loan_acceptors / loan_acceptors
+prop_online_loan_acceptors
+```
+```{r}
+total_nrows <- nrow(Training_data)
+prop_loan_acceptors <- loan_acceptors / total_nrows
+prop_loan_acceptors
+```
+```{r}
+cc_loan_rejector <- sum(Training_data$CreditCard[Training_data$`Personal Loan` == 0])
+loan_rejector <- sum(Training_data$`Personal Loan` == 0)
+prop_cc1_loan_rejector <- cc_loan_rejector / loan_rejector
+prop_cc1_loan_rejector
+```
+```{r}
+online_loan_rejectors <- sum(Training_data$Online[Training_data$`Personal Loan` == 0])
+prop_online1_loan_rejector <- online_loan_rejectors / loan_rejector
+prop_online1_loan_rejector
+```
+```{r}
+prop_loan_rejectors <- loan_rejector / total_nrows
+prop_loan_rejectors
+```
+```{r}
+naiveBayes_model <- naiveBayes(`Personal Loan` ~ CreditCard + Online, data = Training_data)
+predicted_test_labels <- predict(naiveBayes_model, Validation_data, type = "raw")
+roc(Validation_data$`Personal Loan`, predicted_test_labels[,2])
+# The one calculated in the pivot table had a better output than this
+```
+
+
