@@ -1,0 +1,58 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+```{r}
+library(readr)
+Pharmaceuticals <- read_csv("Downloads/Pharmaceuticals.csv")
+```
+```{r}
+library(factoextra)
+library(ISLR)
+library(tidyverse)
+library(flexclust)
+```
+```{r}
+Pharmaceuticals_only_numbers <- Pharmaceuticals[,-1]
+Pharmaceuticals_only_numbers <- Pharmaceuticals_only_numbers[,-1]
+Pharmaceuticals_only_numbers <- Pharmaceuticals_only_numbers[,-12]
+Pharmaceuticals_only_numbers <- Pharmaceuticals_only_numbers[,-11]
+Pharmaceuticals_only_numbers <- Pharmaceuticals_only_numbers[,-10]
+```
+
+
+```{r}
+pharm <- scale(Pharmaceuticals_only_numbers)
+distance <- get_dist(Pharmaceuticals_only_numbers)
+fviz_dist(distance)
+```
+```{r}
+Pharmclust <- kmeans(Pharmaceuticals_only_numbers, centers = 4, nstart = 25)
+Pharmclust$size
+Pharmclust$centers
+# The fviz_cluster package can't be used on my computer, I can't install the correct packages (ggpubr)
+```
+```{r}
+set.seed(123)
+pharma_cluster <- kcca(Pharmaceuticals_only_numbers, k = 4, kccaFamily("kmedians"))
+pharma_cluster
+```
+```{r}
+cluster_index <- predict(pharma_cluster)
+image(pharma_cluster)
+points(Pharmaceuticals_only_numbers, col = cluster_index, pch = 10, cex = .5)
+# By looking at this cluster, we can see that the clustering 
+# seems to be based off of the market capitalization of each of these companies.
+# The Y axis is based off of the beta
+```
+```{r}
+# Cluster 1 is market cap > 100
+# Cluster 2 is middle market cap
+# Cluster 3 is very small market cap
+# Cluster 4 is small market cap
+# The 1st cluster all of those variables have hold or moderately buy as a recommendation.
+```
+
