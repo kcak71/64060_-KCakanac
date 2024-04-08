@@ -1,0 +1,73 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+```{r}
+library(readr)
+Cereals <- read_csv("Downloads/Cereals.csv")
+View(Cereals)
+library(stats)
+library(cluster)
+library(class)
+library(caret)
+```
+```{r}
+Cereals <- na.omit(Cereals)
+numeric_cereal<- sapply(Cereals, is.numeric)
+scale_numeric <- scale(Cereals[,numeric_cereal])
+scale_df <- as.data.frame(scale_numeric)
+Cereals_scaled <- cbind(Cereals[!numeric_cereal], scale_df)
+```
+```{r}
+euclidean <- dist(Cereals_scaled, method = "euclidean")
+euclid_cluster <- hclust(euclidean, method = "complete")
+plot(euclid_cluster, cex =.5, hang =-5)
+```
+```{r}
+agnes_single <- agnes(Cereals_scaled, method = "single")
+print(agnes_single)
+```
+```{r}
+agnes_complete <- agnes(Cereals_scaled, method = "complete")
+print(agnes_complete)
+```
+```{r}
+agnes_average <- agnes(Cereals_scaled, method = "average")
+print(agnes_average)
+```
+```{r}
+# The complete agnes was the best result, since it was the closest to one. I would choose 6 clusters since the dendrogram below shows 6 main clusters until it gets hard to tell where the clusters go.
+pltree(agnes_complete, cex =.6, hang = -5, main = "The Dendrogram of agnes") 
+rect.hclust(agnes_complete, k = 6, border = 1:6)
+```
+
+```{r}
+Cereals_index <- createDataPartition(Cereals_scaled$calories, p =.5, list = FALSE)
+Cereal_A <- Cereals_scaled[Cereals_index,]
+Cereal_B <- Cereals_scaled[-Cereals_index,]
+```
+
+```{r}
+Cereal_A_Agnes <- agnes(Cereal_A, method = "complete")
+pltree(Cereal_A_Agnes, cex =.6, hang = -5, main = "The Dendrogram of Cereal A") 
+rect.hclust(Cereal_A_Agnes, k = 6, border = 1:6)
+```
+
+```{r}
+Cereal_B_Agnes <- agnes(Cereal_B, method = "complete")
+pltree(Cereal_B_Agnes, cex =.6, hang = -5, main = "The Dendrogram of Cereal B") 
+rect.hclust(Cereal_B_Agnes, k = 6, border = 1:6)
+```
+
+```{r}
+print(Cereal_A_Agnes)
+print(Cereal_B_Agnes)
+# By looking at this, the cluster assignments look like they are very very similar between each of the partitions. Each dendrogram has similar outputs, except Cereal A has a slightly cleaner looking outlook, but has less height between some clusters showing high individual correlation.
+```
+```{r}
+# The data should be normalized because the clusters will be very skewed if they are not. You wouldn't be able to find a truly "healthy cluster", unless you were to just filter your data to only include healthy options. An example of the clusters that were already made for "healthy" options was cereals 73, 72, 70, 69 and 67. This cluster was identified in the dendrogram of agnes.
+```
+
+
